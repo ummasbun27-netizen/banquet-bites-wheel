@@ -37,4 +37,4 @@ Yayınlama istendi. QR kodu yayın için belirlenen misafir menüsü adresini ku
 - [x] 5 çevirmede 1 Maybe Next Time; günde ~3 kez arka arkaya iki Maybe Next Time
 
 # Veritabanı
-- [ ] Veritabanını bağla (kendi Supabase veya Lovable Cloud) ve menü/çark tablolarını + başlangıç verilerini kur (kullanıcı sonra karar verecek)
+- [x] Veritabanını Lovable Cloud ile bağla; menü, çark tabloları ve başlangıç verileri kuruldu
