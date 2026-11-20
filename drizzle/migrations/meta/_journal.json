@@ -1,0 +1,76 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1795202516794,
+      "tag": "0000_import_menu_wheel_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795202562030,
+      "tag": "0001_import_menu_data",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795202575536,
+      "tag": "0002_fix_menu_photo_paths",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795202582984,
+      "tag": "0003_restrict_social_accounts_public_read",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795202599870,
+      "tag": "0004_spread_wheel_prizes_over_day",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795202624317,
+      "tag": "0005_adaptive_wheel_prize_pacing",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795202647042,
+      "tag": "0006_wheel_prize_gap",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1795202670002,
+      "tag": "0007_wheel_prize_gap_boost",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795202694784,
+      "tag": "0008_wheel_consolation_prize",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795202723605,
+      "tag": "0009_wheel_miss_pairs",
+      "breakpoints": true
+    }
+  ]
+}
