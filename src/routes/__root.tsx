@@ -11,7 +11,18 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { LOGO_WEBP } from "../lib/logo";
+
+// Warm up the connection to the backend early (read from the public VITE_ variable).
+const backendOrigin = (() => {
+  try {
+    return new URL(import.meta.env["VITE_SUPABASE_URL"] as string).origin;
+  } catch {
+    return null;
+  }
+})();
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -80,12 +91,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     // twitter:image here: every page without its own would inherit the root's preview image.
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" },
+      { title: "Coffee Menu" },
+      { name: "description", content: "Hot and iced coffee menu" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
@@ -95,7 +103,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "preload", as: "image", href: LOGO_WEBP, type: "image/webp", fetchPriority: "high" },
+      ...(backendOrigin
+        ? [
+            { rel: "preconnect", href: backendOrigin, crossOrigin: "anonymous" as const },
+            { rel: "dns-prefetch", href: backendOrigin },
+          ]
+        : []),
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
     ],
   }),
   shellComponent: RootShell,
@@ -121,10 +136,23 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  // Block pinch zoom (iOS Safari ignores user-scalable=no) and double-tap zoom.
+  useEffect(() => {
+    const block = (e: Event) => e.preventDefault();
+    const pinch = (e: TouchEvent) => { if (e.touches.length > 1) e.preventDefault(); };
+    document.addEventListener("gesturestart", block, { passive: false });
+    document.addEventListener("touchmove", pinch, { passive: false });
+    return () => {
+      document.removeEventListener("gesturestart", block);
+      document.removeEventListener("touchmove", pinch);
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <Toaster />
     </QueryClientProvider>
   );
 }

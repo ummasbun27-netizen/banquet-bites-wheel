@@ -1,0 +1,10 @@
+[
+ {"capability":"code","source":"GitHub hare-a11y/banquet-bites-decision-wheel: routes, components, public/menu photos, assets, tests, cark.html, Vercel/Netlify config, roadmap, AGENTS.md","outcome":"copy","status":"done","next_action":"none"},
+ {"capability":"schema","source":"drizzle/migrations 0000-0009 (menu, wheel, comments, social, storage bucket)","outcome":"migrate","status":"pending","next_action":"Apply after the user picks the backend (own Supabase vs Lovable Cloud)"},
+ {"capability":"records","source":"Seed data in migration 0001 (categories, items, wheel defaults, social rows)","outcome":"migrate","status":"pending","next_action":"Applied with the schema"},
+ {"capability":"live records not in repo","source":"Edits, guest comments, prize codes, social links stored only in the old backend","outcome":"migrate","status":"pending","next_action":"User exports CSV/JSON from the old project if needed"},
+ {"capability":"file storage","source":"Private menu-photos bucket, server-only access","outcome":"migrate","status":"pending","next_action":"Created by migration"},
+ {"capability":"auth","source":"None (passwordless dashboard)","outcome":"not needed","status":"accepted","next_action":"none"},
+ {"capability":"secrets","source":"SUPABASE_SERVICE_ROLE_KEY used by managementDb","outcome":"migrate","status":"pending","next_action":"Provided automatically by the connected backend"},
+ {"capability":"verification","source":"tests, dashboard, guest menu, wheel config + spin","outcome":"verify","status":"pending","next_action":"Run after backend is connected"}
+]
