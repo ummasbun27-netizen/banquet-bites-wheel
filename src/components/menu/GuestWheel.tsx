@@ -4,6 +4,7 @@ import { ArrowLeft, FerrisWheel, LoaderCircle, RotateCw } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Button } from "@/components/ui/button";
 import { guestWheelSchema } from "@/lib/wheel-schema";
+import { loadPrizes, savePrize, type SavedPrize } from "@/lib/saved-prizes";
 
 function today() {
   const d = new Date();
@@ -45,10 +46,11 @@ export function GuestWheel({ open, onOpenChange }: { open: boolean; onOpenChange
   const [winner, setWinner] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [code, setCode] = useState<string | null>(null);
+  const [saved, setSaved] = useState<SavedPrize[]>([]);
   const frame = useRef<number | null>(null);
   const spinning = useRef(false);
   useEffect(() => {
-    if (open) setCount(spinCount());
+    if (open) { setCount(spinCount()); setSaved(loadPrizes()); }
   }, [open]);
   useEffect(() => () => { if (frame.current !== null) cancelAnimationFrame(frame.current); }, []);
   const settings = config.data;
@@ -84,7 +86,11 @@ export function GuestWheel({ open, onOpenChange }: { open: boolean; onOpenChange
         const progress = Math.min(1, (now - started) / duration);
         setRotation(rotation + delta * (1 - Math.pow(1 - progress, 4)));
         if (progress < 1) frame.current = requestAnimationFrame(animate);
-        else { setWinner(index); setCode(result.code ?? null); setBusy(false); spinning.current = false; }
+        else {
+          const won = prizes[index];
+          if (result.code && won && !won.x) setSaved(savePrize({ code: result.code, prize: won.t, emoji: won.e }));
+          setWinner(index); setCode(result.code ?? null); setBusy(false); spinning.current = false;
+        }
       };
       frame.current = requestAnimationFrame(animate);
     } catch (err) {
@@ -141,6 +147,17 @@ export function GuestWheel({ open, onOpenChange }: { open: boolean; onOpenChange
                   {!settings || busy ? "…" : full ? "Out of spins, come back tomorrow" : settings.max_spins > 0 ? `SPIN! (${Math.max(0, settings.max_spins - count)} left)` : "SPIN!"}
                 </Button>}
           </section>
+          {saved.length > 0 && <section aria-label="Your prize codes" className="mt-4 rounded-[20px] border border-border bg-card p-5">
+            <h2 className="text-lg font-bold">Your prize codes today</h2>
+            <p className="text-sm text-muted-foreground">Saved on this phone — show a code at the counter.</p>
+            <ul className="mt-3 space-y-2">
+              {saved.map((p) => <li key={p.code} className="flex items-center gap-3 rounded-2xl bg-secondary px-4 py-3">
+                <span aria-hidden className="text-3xl">{p.emoji}</span>
+                <span className="min-w-0 flex-1 break-words font-semibold">{p.prize}</span>
+                <span className="font-mono text-xl font-extrabold tracking-[0.15em]">{p.code}</span>
+              </li>)}
+            </ul>
+          </section>}
         </div>
         {(result || error) && <div className="fixed inset-0 z-10 flex items-center justify-center bg-overlay p-5" onClick={() => { setWinner(null); setError(""); }}>
           <div role="status" className="w-full max-w-[360px] animate-in zoom-in-75 rounded-3xl bg-card px-5 py-6 text-center" onClick={(e) => e.stopPropagation()}>
@@ -150,7 +167,7 @@ export function GuestWheel({ open, onOpenChange }: { open: boolean; onOpenChange
             {!error && !result?.x && code && <div className="mt-3 rounded-2xl bg-secondary px-4 py-3">
               <p className="text-sm text-muted-foreground">Your prize code</p>
               <p className="font-mono text-4xl font-extrabold tracking-[0.2em]">{code}</p>
-              <p className="mt-1 text-sm text-muted-foreground">Valid today only — show this code at the counter.</p>
+              <p className="mt-1 text-sm text-muted-foreground">Valid today only — saved below on this phone. Show it at the counter.</p>
             </div>}
             <button type="button" className="mt-2.5 w-full text-muted-foreground" onClick={() => { setWinner(null); setError(""); }}>Close</button>
           </div>

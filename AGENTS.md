@@ -43,3 +43,5 @@ use the editor.
 <!-- AGENT-MEMORY:BEGIN -->
 - Render the guest wheel inside the menu with shared design components and load its public settings when the menu mounts; avoiding an iframe removes an extra document load and preserves the app's appearance. Keep prize selection on the existing server endpoint.
 <!-- AGENT-MEMORY:END -->
+
+- Guest prize codes are also kept in the browser (src/lib/saved-prizes.ts, local day only) purely for display; the server wheel_claims row stays the source of truth for validity.

@@ -38,3 +38,4 @@ Yayınlama istendi. QR kodu yayın için belirlenen misafir menüsü adresini ku
 
 # Veritabanı
 - [x] Veritabanını Lovable Cloud ile bağla; menü, çark tabloları ve başlangıç verileri kuruldu
+- [x] Kazanılan ödül kodları misafirin telefonunda o gün boyunca saklanır ve çark ekranında görünür
