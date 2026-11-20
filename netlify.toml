@@ -7,3 +7,15 @@
 
 # Nitro registers its internal function on /* and serves static files first.
 # A static index.html fallback would intercept server functions and API routes.
+
+# Long-lived caching for fingerprinted build assets and bundled menu photos
+# (mirrors the headers in vercel.json).
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/menu/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
