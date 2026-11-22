@@ -9,8 +9,8 @@ export const attachAdminToken = createMiddleware({ type: "function" }).client(as
 });
 
 /**
- * Every management server function goes through here: the caller must be signed in with a
- * confirmed email on the ADMIN_EMAILS list before the service-role client is handed out.
+ * Every management server function goes through here: the caller must be signed in as a
+ * confirmed user from the backend user list before the service-role client is handed out.
  */
 export const managementDb = createMiddleware({ type: "function" })
   .middleware([attachAdminToken])

@@ -1,15 +1,11 @@
-/** Pure allow-list rules for the management panel; the list itself lives in the ADMIN_EMAILS env var. */
-export function parseAdminEmails(raw: string | undefined): Set<string> {
-  return new Set((raw ?? "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean));
-}
-
+/**
+ * Dashboard access rule: any account the owner added in the backend user list, with a confirmed
+ * email, may manage the menu. Public sign-up is switched off, so nobody else can create an account.
+ */
 export type AdminCandidate = { email?: string | null | undefined; email_confirmed_at?: string | null | undefined };
 
-/** Only a confirmed email that is on the list may manage the menu. An empty list denies everyone. */
-export function isAllowedAdmin(user: AdminCandidate | null | undefined, rawList: string | undefined): boolean {
-  const email = user?.email?.trim().toLowerCase();
-  if (!email || !user?.email_confirmed_at) return false;
-  return parseAdminEmails(rawList).has(email);
+export function isAllowedAdmin(user: AdminCandidate | null | undefined): boolean {
+  return !!user?.email?.trim() && !!user.email_confirmed_at;
 }
 
 export function bearerToken(header: string | null | undefined): string | null {

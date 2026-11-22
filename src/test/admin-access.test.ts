@@ -9,24 +9,17 @@ import { verifyAdminRequest } from "@/lib/admin-auth.server";
 
 const confirmed = "2026-11-01T00:00:00Z";
 
-describe("dashboard allow-list", () => {
-  it("allows a confirmed email on the list, ignoring case and spaces", () => {
-    expect(isAllowedAdmin({ email: "Owner@Gmail.com", email_confirmed_at: confirmed }, " other@gmail.com , owner@gmail.com ")).toBe(true);
+describe("dashboard access", () => {
+  it("allows a backend user with a confirmed email", () => {
+    expect(isAllowedAdmin({ email: "ummasbun27@gmail.com", email_confirmed_at: confirmed })).toBe(true);
   });
 
-  it("denies an email that is not on the list", () => {
-    expect(isAllowedAdmin({ email: "guest@gmail.com", email_confirmed_at: confirmed }, "owner@gmail.com")).toBe(false);
+  it("denies a user whose email is not confirmed", () => {
+    expect(isAllowedAdmin({ email: "ummasbun27@gmail.com", email_confirmed_at: null })).toBe(false);
   });
 
-  it("denies an unconfirmed email even when it is on the list", () => {
-    expect(isAllowedAdmin({ email: "owner@gmail.com", email_confirmed_at: null }, "owner@gmail.com")).toBe(false);
-  });
-
-  it("denies everyone when the list is empty or missing", () => {
-    const user = { email: "owner@gmail.com", email_confirmed_at: confirmed };
-    expect(isAllowedAdmin(user, "")).toBe(false);
-    expect(isAllowedAdmin(user, undefined)).toBe(false);
-    expect(isAllowedAdmin(user, " , ")).toBe(false);
+  it("denies when there is no user", () => {
+    expect(isAllowedAdmin(null)).toBe(false);
   });
 
   it("reads only a Bearer token", () => {
@@ -37,7 +30,7 @@ describe("dashboard allow-list", () => {
 });
 
 describe("server check for management requests", () => {
-  beforeEach(() => { auth.getUser.mockReset(); auth.header = null; vi.stubEnv("ADMIN_EMAILS", "owner@gmail.com"); });
+  beforeEach(() => { auth.getUser.mockReset(); auth.header = null; });
 
   it("rejects a request without a token and never asks the auth server", async () => {
     expect(await verifyAdminRequest()).toEqual({ signedIn: false, allowed: false });
@@ -50,12 +43,10 @@ describe("server check for management requests", () => {
     expect((await verifyAdminRequest()).allowed).toBe(false);
   });
 
-  it("allows the approved owner and rejects another signed-in account", async () => {
+  it("allows a confirmed backend user the auth server recognises", async () => {
     auth.header = "Bearer good";
-    auth.getUser.mockResolvedValue({ data: { user: { email: "owner@gmail.com", email_confirmed_at: confirmed } }, error: null });
+    auth.getUser.mockResolvedValue({ data: { user: { email: "ummasbun27@gmail.com", email_confirmed_at: confirmed } }, error: null });
     expect(await verifyAdminRequest()).toEqual({ signedIn: true, allowed: true });
     expect(auth.getUser).toHaveBeenCalledWith("good");
-    auth.getUser.mockResolvedValue({ data: { user: { email: "someone@gmail.com", email_confirmed_at: confirmed } }, error: null });
-    expect(await verifyAdminRequest()).toEqual({ signedIn: true, allowed: false });
   });
 });

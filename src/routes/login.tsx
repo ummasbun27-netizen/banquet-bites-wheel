@@ -34,10 +34,13 @@ function Login() {
     setBusy(true); setError("");
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email: parsed.data,
-      options: { emailRedirectTo: window.location.origin + "/dashboard", shouldCreateUser: true },
+      options: { emailRedirectTo: window.location.origin + "/dashboard", shouldCreateUser: false },
     });
     setBusy(false);
-    if (otpError) setError(otpError.status === 429 ? "Too many attempts. Please wait a minute and try again." : "Could not send the sign-in link. Please try again.");
+    if (otpError) setError(
+      otpError.status === 429 ? "Too many attempts. Please wait a minute and try again."
+      : otpError.status === 422 || /signup|not allowed|not found/i.test(otpError.message) ? "This email is not approved for the dashboard."
+      : "Could not send the sign-in link. Please try again.");
     else setSent(true);
   }
 

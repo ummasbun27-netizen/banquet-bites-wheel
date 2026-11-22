@@ -23,7 +23,7 @@ Yayınlama istendi. QR kodu yayın için belirlenen misafir menüsü adresini ku
 - [x] Çarkı menüyle aynı görünümde, ayrı sayfa yüklemeden hızlı açma ve telefon kontrolü
 - [x] Güvenlik: yorumlar gizli, çark hilesine karşı sunucu sınırı ve ödül kodları, fotoğraf yükleme sunucuda kontrollü
 - [x] Yönetim paneline e-posta bağlantısıyla giriş; yalnızca onaylı adresler
-- [ ] ADMIN_EMAILS listesini Project Settings → Secrets içine ekle (kullanıcı ekler)
+- [x] Girişe yalnızca backend kullanıcı listesindeki hesaplar izinli (ummasbun27@gmail.com eklendi), herkese açık kayıt kapalı
 
 ## Yayın taşınabilirliği
 - [x] Vercel ve Netlify hedefleri, IP başlığı sırası ve ortam değişkeni rehberi
