@@ -40,3 +40,5 @@ Yayınlama istendi. QR kodu yayın için belirlenen misafir menüsü adresini ku
 # Veritabanı
 - [x] Veritabanını Lovable Cloud ile bağla; menü, çark tabloları ve başlangıç verileri kuruldu
 - [x] Kazanılan ödül kodları misafirin telefonunda o gün boyunca saklanır ve çark ekranında görünür
+- [ ] Panel girişi: yalnızca ummasbun27@gmail.com, "Google ile giriş" düğmesi (e-posta bağlantısı kaldırıldı)
+- [ ] Verileri kullanıcının kendi Supabase projesine taşıma (kullanıcı onayı bekleniyor)
