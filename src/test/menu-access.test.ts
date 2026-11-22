@@ -12,7 +12,7 @@ const database = vi.hoisted(() => ({
 
 vi.mock("@tanstack/react-start", () => ({
   createServerOnlyFn: (handler: unknown) => handler,
-  createMiddleware: () => ({ server: (handler: unknown) => handler }),
+  createMiddleware: () => { const builder: Record<string, () => unknown> = {}; builder["client"] = builder["server"] = builder["middleware"] = () => builder; return builder; },
   createServerFn: () => {
     let validate = (data: unknown) => data;
     const builder = {

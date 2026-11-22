@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as MenuRouteImport } from './routes/menu'
 import { Route as ApiPublicWheelConfigRouteImport } from './routes/api/public/wheel-config'
 import { Route as ApiPublicWheelSpinRouteImport } from './routes/api/public/wheel-spin'
@@ -30,6 +31,11 @@ const AuthRoute = AuthRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MenuRoute = MenuRouteImport.update({
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
   '/menu': typeof MenuRoute
   '/api/public/wheel-config': typeof ApiPublicWheelConfigRoute
   '/api/public/wheel-spin': typeof ApiPublicWheelSpinRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
   '/menu': typeof MenuRoute
   '/api/public/wheel-config': typeof ApiPublicWheelConfigRoute
   '/api/public/wheel-spin': typeof ApiPublicWheelSpinRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
   '/menu': typeof MenuRoute
   '/api/public/wheel-config': typeof ApiPublicWheelConfigRoute
   '/api/public/wheel-spin': typeof ApiPublicWheelSpinRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/login'
     | '/menu'
     | '/api/public/wheel-config'
     | '/api/public/wheel-spin'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/login'
     | '/menu'
     | '/api/public/wheel-config'
     | '/api/public/wheel-spin'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/login'
     | '/menu'
     | '/api/public/wheel-config'
     | '/api/public/wheel-spin'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   DashboardRoute: typeof DashboardRoute
+  LoginRoute: typeof LoginRoute
   MenuRoute: typeof MenuRoute
   ApiPublicWheelConfigRoute: typeof ApiPublicWheelConfigRoute
   ApiPublicWheelSpinRoute: typeof ApiPublicWheelSpinRoute
@@ -142,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/menu': {
@@ -179,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   DashboardRoute: DashboardRoute,
+  LoginRoute: LoginRoute,
   MenuRoute: MenuRoute,
   ApiPublicWheelConfigRoute: ApiPublicWheelConfigRoute,
   ApiPublicWheelSpinRoute: ApiPublicWheelSpinRoute,

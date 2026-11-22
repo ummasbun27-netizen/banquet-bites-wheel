@@ -1,11 +1,23 @@
 import { createMiddleware } from "@tanstack/react-start";
 
-/**
- * Every management server function that touches locked tables or storage goes through here.
- * The panel has no sign-in yet (Gmail sign-in comes later): add the signed-in owner check
- * at the top of this handler then, and every management function is protected at once.
- */
-export const managementDb = createMiddleware({ type: "function" }).server(async ({ next }) => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  return next({ context: { db: supabaseAdmin } });
+/** Sends the signed-in owner's access token with each management request. */
+export const attachAdminToken = createMiddleware({ type: "function" }).client(async ({ next }) => {
+  const { supabase } = await import("@/integrations/supabase/client");
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  return next({ headers: token ? { Authorization: `Bearer ${token}` } : {} });
 });
+
+/**
+ * Every management server function goes through here: the caller must be signed in with a
+ * confirmed email on the ADMIN_EMAILS list before the service-role client is handed out.
+ */
+export const managementDb = createMiddleware({ type: "function" })
+  .middleware([attachAdminToken])
+  .server(async ({ next }) => {
+    const { verifyAdminRequest } = await import("./admin-auth.server");
+    const { allowed } = await verifyAdminRequest();
+    if (!allowed) throw new Error("Not allowed");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    return next({ context: { db: supabaseAdmin } });
+  });

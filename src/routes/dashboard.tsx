@@ -1,8 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useQuery, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { Coffee, LayoutGrid, UtensilsCrossed, QrCode, Plus, Pencil, Trash2, Download, Copy, Search, Eye, EyeOff, Check, ImageOff, MessageSquareText, MailOpen, Mail, FerrisWheel, Share2 } from "lucide-react";
+import { Coffee, LayoutGrid, UtensilsCrossed, QrCode, Plus, Pencil, Trash2, Download, Copy, Search, Eye, EyeOff, Check, ImageOff, MessageSquareText, MailOpen, Mail, FerrisWheel, Share2, LogOut, ShieldX } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -17,15 +17,45 @@ import { PhotoUploader } from "@/components/menu/PhotoUploader";
 import { WheelPanel } from "@/components/menu/WheelPanel";
 import { SocialPanel } from "@/components/menu/SocialPanel";
 import { publishedMenuUrl, resolvedGuestMenuUrl } from "@/lib/menu-url";
+import { supabase } from "@/integrations/supabase/client";
+import { getAdminAccess } from "@/lib/admin.functions";
+import { useSignOut } from "@/lib/use-sign-out";
 
 export const Route = createFileRoute("/dashboard")({
-  loader: ({ context }) => context.queryClient.ensureQueryData(dashboardQuery),
+  // The session lives in the browser, so this page renders only there.
+  ssr: false,
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) throw redirect({ to: "/login", replace: true });
+  },
+  loader: async ({ context }) => {
+    const { allowed } = await getAdminAccess();
+    if (allowed) await context.queryClient.ensureQueryData(dashboardQuery);
+    return { allowed };
+  },
   head: () => ({ meta: [
     { title: "Dashboard — Coffee Menu" }, { name: "description", content: "Manage your categories, products, prices and menu QR code." },
     { property: "og:title", content: "Coffee Menu Dashboard" }, { property: "og:description", content: "Menu and category management." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }, { name: "robots", content: "noindex" },
-  ] }), component: Dashboard,
+  ] }), component: DashboardPage,
 });
+
+function DashboardPage() {
+  const { allowed } = Route.useLoaderData();
+  return allowed ? <Dashboard /> : <NotAllowed />;
+}
+
+function NotAllowed() {
+  const signOut = useSignOut();
+  return <main className="flex min-h-screen items-center justify-center px-4">
+    <div className="w-full max-w-sm rounded-3xl border border-border bg-card p-6 text-center">
+      <ShieldX className="mx-auto size-10 text-destructive" />
+      <h1 className="mt-3 text-lg font-semibold">This account is not allowed</h1>
+      <p className="mt-1.5 text-sm text-muted-foreground">Sign in with an approved email to manage the menu.</p>
+      <Button className="mt-5 w-full" onClick={() => void signOut()}><LogOut />Sign out</Button>
+    </div>
+  </main>;
+}
 
 type Item = Tables<"menu_items">;
 type Category = Tables<"menu_categories">;
@@ -40,6 +70,7 @@ function Dashboard() {
   const [menuUrl, setMenuUrl] = useState<string | null>(publishedMenuUrl);
   useEffect(() => { setMenuUrl(resolvedGuestMenuUrl(window.location.origin)); }, []);
   const { data } = useSuspenseQuery(dashboardQuery);
+  const signOut = useSignOut();
   const client = useQueryClient();
   const saveProduct = useServerFn(saveItem); const saveCat = useServerFn(saveCategory); const remove = useServerFn(deleteEntry); const setAvailability = useServerFn(setItemAvailability);
   const comments = useQuery({ ...commentsQuery, refetchInterval: 30000 });
@@ -134,7 +165,10 @@ function Dashboard() {
           <div className="flex size-10 items-center justify-center rounded-xl bg-primary/15 text-primary"><Coffee className="size-5" /></div>
           <div><p className="font-semibold leading-tight">Coffee Menu</p><p className="text-xs text-muted-foreground">Dashboard</p></div>
         </div>
-        <Button variant="outline" size="sm" asChild><Link to="/menu"><Eye />View menu</Link></Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" asChild><Link to="/menu"><Eye />View menu</Link></Button>
+          <Button variant="ghost" size="sm" onClick={() => void signOut()}><LogOut />Sign out</Button>
+        </div>
       </div>
       <nav className="mx-auto grid max-w-5xl grid-cols-5 gap-1 px-4 pb-3" aria-label="Dashboard sections">
         {tabs.map((t) => <button key={t.id} type="button" onClick={() => setTab(t.id)} aria-current={tab === t.id ? "page" : undefined}
