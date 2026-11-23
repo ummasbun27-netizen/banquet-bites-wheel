@@ -36,6 +36,7 @@ Yayınlama istendi. QR kodu yayın için belirlenen misafir menüsü adresini ku
 ## Çark sonuçları
 - [x] Büyük ödül çıkmadığında çoğu zaman 10 Birr Off
 - [x] 5 çevirmede 1 Maybe Next Time; günde ~3 kez arka arkaya iki Maybe Next Time
+- [x] Aynı telefon arka arkaya iki kez kazanamaz: kazandıktan sonraki çevirme Maybe Next Time
 
 # Veritabanı
 - [x] Veritabanını Lovable Cloud ile bağla; menü, çark tabloları ve başlangıç verileri kuruldu

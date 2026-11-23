@@ -275,16 +275,19 @@ export type Database = {
           count: number
           day: string
           device_id: string
+          last_won: boolean
         }
         Insert: {
           count?: number
           day: string
           device_id: string
+          last_won?: boolean
         }
         Update: {
           count?: number
           day?: string
           device_id?: string
+          last_won?: boolean
         }
         Relationships: []
       }
