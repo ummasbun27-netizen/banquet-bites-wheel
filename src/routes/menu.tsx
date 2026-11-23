@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { menuQuery } from "@/lib/menu-queries";
+import { menuQuery, socialQuery } from "@/lib/menu-queries";
 import { menuImage, menuThumbWebp } from "@/lib/menu-images";
 import { LOGO_JPEG, LOGO_WEBP } from "@/lib/logo";
 import { MenuPhoto } from "@/components/menu/MenuPhoto";
@@ -22,7 +22,13 @@ export const Route = createFileRoute("/menu")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(menuQuery),
+  // Social links load with the menu so the comment window opens complete; their failure never blocks the menu.
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(menuQuery),
+      context.queryClient.ensureQueryData(socialQuery).catch(() => null),
+    ]);
+  },
   component: Menu,
 });
 
@@ -118,7 +124,7 @@ function Menu() {
             return (
               <article key={item.id} className="card-press cursor-pointer rounded-3xl bg-card p-2.5" role="button" tabIndex={0} aria-label={`${item.name} details`} onClick={() => setOpenId(item.id)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenId(item.id); } }}>
                 <div className="relative">
-                  <MenuPhoto src={item.img} webp={menuThumbWebp(item.img)} alt={item.name} size={480} priority={index < 2}
+                  <MenuPhoto src={item.img} webp={menuThumbWebp(item.img)} alt={item.name} size={480} priority={index < 6}
                     className="aspect-square w-full rounded-2xl object-cover" />
                   <button aria-label="Favorite"
                     onClick={(e) => { e.stopPropagation(); toggleFav(item.id); }}

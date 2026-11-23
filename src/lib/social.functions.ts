@@ -18,10 +18,10 @@ export const getSocialAdmin = createServerFn({ method: "GET" }).middleware([mana
   return (data ?? []) as SocialAccount[];
 });
 
-const socialInput = z.object({ accounts: z.array(z.object({
-  id: z.enum(["tiktok", "instagram", "facebook"]),
+export const socialInput = z.object({ accounts: z.array(z.object({
+  id: z.enum(["tiktok", "instagram"]),
   url: z.string().trim().max(300).refine((u) => u === "" || /^https:\/\//.test(u), "Links must start with https://"),
-})).max(3) });
+})).max(2) });
 
 export const saveSocial = createServerFn({ method: "POST" }).middleware([managementDb]).inputValidator((i) => socialInput.parse(i)).handler(async ({ data, context }) => {
   for (const a of data.accounts) {

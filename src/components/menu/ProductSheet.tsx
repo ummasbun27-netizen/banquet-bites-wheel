@@ -1,6 +1,7 @@
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { useState } from "react";
 import { Heart, X } from "lucide-react";
-import { menuFullWebp } from "@/lib/menu-images";
+import { menuFullWebp, menuThumbWebp } from "@/lib/menu-images";
 import { MenuPhoto } from "./MenuPhoto";
 
 export type ProductDetail = { id: string; name: string; categoryName?: string | undefined; price: number; old?: number | undefined; img: string; desc: string };
@@ -19,7 +20,7 @@ export function ProductSheet({ item, fav, onToggleFav, onClose }: { item: Produc
         >
           {item && <>
             <div className="relative">
-              <MenuPhoto src={item.img} webp={menuFullWebp(item.img)} alt={item.name} size={800} priority className="aspect-square w-full rounded-2xl object-cover" />
+              <ProductPhoto key={item.id} img={item.img} alt={item.name} />
               <DialogPrimitive.Close aria-label="Close" className={`absolute left-2 top-2 ${roundButton}`}><X className="size-4" /></DialogPrimitive.Close>
               <button type="button" onClick={onToggleFav} aria-label="Favorite" className={`absolute right-2 top-2 ${roundButton}`}><Heart className={`size-4 ${fav ? "fill-primary text-primary" : ""}`} /></button>
             </div>
@@ -35,5 +36,17 @@ export function ProductSheet({ item, fav, onToggleFav, onClose }: { item: Produc
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
+  );
+}
+
+// The 480px thumbnail is already cached from the menu list, so it shows at once; the full photo fades in over it.
+function ProductPhoto({ img, alt }: { img: string; alt: string }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <div className="relative">
+      <MenuPhoto src={img} webp={menuThumbWebp(img)} alt={alt} size={800} priority className="aspect-square w-full rounded-2xl object-cover" />
+      <MenuPhoto src={img} webp={menuFullWebp(img)} alt="" size={800} priority onLoad={() => setLoaded(true)}
+        className={`absolute inset-0 h-full w-full rounded-2xl object-cover transition-opacity duration-200 ${loaded ? "opacity-100" : "opacity-0"}`} />
+    </div>
   );
 }

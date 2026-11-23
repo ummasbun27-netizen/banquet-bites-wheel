@@ -45,3 +45,4 @@ use the editor.
 <!-- AGENT-MEMORY:END -->
 
 - Guest prize codes are also kept in the browser (src/lib/saved-prizes.ts, local day only) purely for display; the server wheel_claims row stays the source of truth for validity.
+- The router hands the server-loaded query cache to the browser (react-router-ssr-query, wrapQueryClient false because __root renders QueryClientProvider) and queries default to a 60s staleTime; this stops a second fetch right after SSR, so mutations must invalidate the keys they change.
