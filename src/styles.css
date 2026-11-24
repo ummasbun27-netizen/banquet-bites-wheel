@@ -101,3 +101,74 @@
   transition: transform 200ms ease;
   &:active { transform: scale(0.97); }
 }
+
+/* Guest lucky wheel effects (ported from public/cark.html). */
+:root {
+  --wheel-rim: oklch(0.3 0.05 50);
+  --wheel-gold: oklch(0.82 0.14 80);
+  --wheel-gold-bright: oklch(0.89 0.13 88);
+  --wheel-gold-glow: oklch(0.82 0.14 80 / 25%);
+  --wheel-gold-glow-strong: oklch(0.82 0.14 80 / 70%);
+  --wheel-shadow: oklch(0 0 0 / 30%);
+  --wheel-rays: oklch(0.86 0.15 85 / 35%);
+  --wheel-pin: oklch(0.58 0.19 40);
+  --wheel-btn-shadow: oklch(0.5 0.07 50);
+}
+
+.wheel-ring {
+  border-radius: 9999px;
+  box-shadow: 0 0 0 8px var(--wheel-rim), 0 0 0 12px var(--wheel-gold), 0 10px 30px var(--wheel-shadow);
+}
+.wheel-ring.wheel-go { animation: wheel-glow 1s infinite alternate; }
+@keyframes wheel-glow {
+  from { box-shadow: 0 0 0 8px var(--wheel-rim), 0 0 0 12px var(--wheel-gold), 0 0 14px 14px var(--wheel-gold-glow); }
+  to { box-shadow: 0 0 0 8px var(--wheel-rim), 0 0 0 12px var(--wheel-gold-bright), 0 0 34px 22px var(--wheel-gold-glow-strong); }
+}
+
+.wheel-pin {
+  position: absolute; top: -22px; left: 50%; z-index: 2; margin-left: -15px; width: 0; height: 0;
+  border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 36px solid var(--wheel-pin);
+  filter: drop-shadow(0 2px 2px oklch(0 0 0 / 50%));
+  transform-origin: 50% 8%;
+}
+.wheel-pin.wheel-tick { animation: wheel-tick 90ms; }
+@keyframes wheel-tick { 0% { transform: rotate(0); } 40% { transform: rotate(-22deg); } 100% { transform: rotate(0); } }
+
+.wheel-spin-btn { box-shadow: 0 4px 0 var(--wheel-btn-shadow); transition: transform 80ms, box-shadow 80ms; }
+.wheel-spin-btn:not(:disabled) { animation: wheel-pulse 1.6s infinite; }
+.wheel-spin-btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--wheel-btn-shadow); }
+@keyframes wheel-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+
+.wheel-pop { animation: wheel-pop 450ms cubic-bezier(0.2, 1.4, 0.4, 1); }
+@keyframes wheel-pop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.wheel-rays {
+  position: absolute; left: 50%; top: -40px; width: 420px; height: 420px; margin-left: -210px; border-radius: 50%;
+  background: repeating-conic-gradient(var(--wheel-rays) 0 10deg, transparent 10deg 20deg);
+  animation: wheel-rays 8s linear infinite;
+  -webkit-mask-image: radial-gradient(circle, #000 25%, transparent 68%);
+  mask-image: radial-gradient(circle, #000 25%, transparent 68%);
+  pointer-events: none;
+}
+@keyframes wheel-rays { to { transform: rotate(360deg); } }
+
+.wheel-gift-shake { animation: wheel-shake 0.5s infinite; }
+@keyframes wheel-shake {
+  0%, 100% { transform: rotate(0) scale(1); }
+  20% { transform: rotate(-12deg) scale(1.08); }
+  40% { transform: rotate(12deg) scale(1.12); }
+  60% { transform: rotate(-9deg) scale(1.08); }
+  80% { transform: rotate(9deg) scale(1.05); }
+}
+.wheel-reveal { animation: wheel-reveal 0.7s cubic-bezier(0.2, 1.6, 0.4, 1); }
+@keyframes wheel-reveal {
+  0% { transform: scale(0.2) rotate(-30deg); opacity: 0; }
+  60% { transform: scale(1.35) rotate(8deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); }
+}
+.wheel-fade { animation: wheel-fade 0.5s both; }
+@keyframes wheel-fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .wheel-spin-btn:not(:disabled), .wheel-ring.wheel-go, .wheel-rays, .wheel-gift-shake { animation: none; }
+}
