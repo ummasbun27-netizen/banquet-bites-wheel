@@ -42,3 +42,18 @@ export function tickSpeed(deltaDeg: number, dtMs: number) {
   const radPerFrame = (Math.abs(deltaDeg) * Math.PI / 180) / Math.max(1, dtMs) * 16;
   return Math.min(1, radPerFrame * 6);
 }
+
+/** Random display order (Fisher-Yates): a permutation of 0..n-1; entry p is the original prize index on slice p. */
+export function shuffleOrder(n: number, random: () => number = Math.random) {
+  const order = Array.from({ length: Math.max(0, n) }, (_, i) => i);
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.min(i, Math.floor(random() * (i + 1)));
+    const t = order[i]!; order[i] = order[j]!; order[j] = t;
+  }
+  return order;
+}
+
+/** Slice position of an original prize index in the display order (-1 if missing). */
+export function positionOf(order: readonly number[], originalIndex: number) {
+  return order.indexOf(originalIndex);
+}

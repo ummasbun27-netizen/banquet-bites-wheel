@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { guestWheelSchema } from "@/lib/wheel-schema";
 import { loadPrizes, savePrize, type SavedPrize } from "@/lib/saved-prizes";
 import {
-  SPIN_MS, easeOutSlow, sliceUnderPin, spinTarget, startRotation, tickSpeed,
+  SPIN_MS, easeOutSlow, positionOf, shuffleOrder, sliceUnderPin, spinTarget, startRotation, tickSpeed,
 } from "@/lib/wheel-geometry";
 import {
   confetti, giftSound, loadSoundSetting, missSound, setSoundSetting, stopConfetti,
@@ -60,6 +60,7 @@ export function GuestWheel({ open, onOpenChange }: { open: boolean; onOpenChange
   const [glow, setGlow] = useState(false);
   const [gift, setGift] = useState(false);
   const [sound, setSound] = useState(true);
+  const [order, setOrder] = useState<number[]>([]);
   const frame = useRef<number | null>(null);
   const spinning = useRef(false);
   const rot = useRef(0);
@@ -80,6 +81,11 @@ export function GuestWheel({ open, onOpenChange }: { open: boolean; onOpenChange
   }, []);
   const settings = config.data;
   const prizes = settings?.prizes ?? [];
+  // New random slice order each time the wheel opens (or the prizes load), never mid-spin.
+  useEffect(() => {
+    if (open && !spinning.current) setOrder(shuffleOrder(prizes.length));
+  }, [open, prizes.length]);
+  const slices = order.length === prizes.length ? order : prizes.map((_, i) => i);
   const full = !!settings && settings.max_spins > 0 && count >= settings.max_spins;
   const result = winner === null ? undefined : prizes[winner];
   // Before the first spin, the first prize sits centred under the pin (not on a slice edge).
@@ -119,6 +125,12 @@ export function GuestWheel({ open, onOpenChange }: { open: boolean; onOpenChange
   function closeResult() {
     if (revealTimer.current !== null) { clearTimeout(revealTimer.current); revealTimer.current = null; }
     setWinner(null); setError("");
+  }
+
+  /** Closing the result popup: the next spin starts from a fresh slice order. */
+  function dismissResult() {
+    closeResult();
+    if (!spinning.current) setOrder(shuffleOrder(prizes.length));
   }
 
   function toggleSound() {
@@ -165,7 +177,7 @@ export function GuestWheel({ open, onOpenChange }: { open: boolean; onOpenChange
       };
       // The server already chose the prize; one smooth spin lands straight on it.
       const start = hasSpun ? rot.current : startRotation(n);
-      const target = spinTarget(start, index, n, Math.random() - 0.5);
+      const target = spinTarget(start, Math.max(0, positionOf(slices, index)), n, Math.random() - 0.5);
       rot.current = start;
       lastSlice.current = sliceUnderPin(start, n);
       setHasSpun(true); setRotation(start); setGlow(true);
@@ -198,7 +210,8 @@ export function GuestWheel({ open, onOpenChange }: { open: boolean; onOpenChange
               <svg viewBox="0 0 680 680" role="img" aria-label="Prize wheel" className="h-full w-full overflow-visible">
                 <defs><filter id="wheel-text-shadow" x="-20%" y="-50%" width="140%" height="200%"><feDropShadow dx="0" dy="0" stdDeviation="1.5" floodColor="#000" floodOpacity="0.35" /></filter></defs>
                 <g transform={`rotate(${shownRotation} 340 340)`}>
-                  {prizes.map((prize, i) => {
+                  {slices.map((original, i) => {
+                    const prize = prizes[original]!;
                     const arc = Math.PI * 2 / prizes.length;
                     const a = i * arc, b = a + arc;
                     const lines = wheelLines(prize.t);
@@ -246,7 +259,7 @@ export function GuestWheel({ open, onOpenChange }: { open: boolean; onOpenChange
             </ul>
           </section>}
         </div>
-        {(result || error) && <div className="fixed inset-0 z-10 flex items-center justify-center bg-overlay p-5" onClick={closeResult}>
+        {(result || error) && <div className="fixed inset-0 z-10 flex items-center justify-center bg-overlay p-5" onClick={dismissResult}>
           <div role="status" className="wheel-pop relative w-full max-w-[360px] overflow-hidden rounded-3xl bg-card px-5 py-6 text-center" onClick={(e) => e.stopPropagation()}>
             {!error && result && !result.x && !gift && <div aria-hidden className="wheel-rays" />}
             <div className="relative">
@@ -258,7 +271,7 @@ export function GuestWheel({ open, onOpenChange }: { open: boolean; onOpenChange
                 <p className="font-mono text-4xl font-extrabold tracking-[0.2em]">{code}</p>
                 <p className="mt-1 text-sm text-muted-foreground">Valid today only — saved below on this phone. Show it at the counter.</p>
               </div>}
-              <button type="button" className="mt-2.5 w-full text-muted-foreground" onClick={closeResult}>Close</button>
+              <button type="button" className="mt-2.5 w-full text-muted-foreground" onClick={dismissResult}>Close</button>
             </div>
           </div>
         </div>}

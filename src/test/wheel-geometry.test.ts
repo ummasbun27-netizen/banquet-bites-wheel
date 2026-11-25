@@ -29,3 +29,34 @@ describe("guest wheel geometry", () => {
     for (let k = 0.05; k <= 1; k += 0.05) { expect(easeOutSlow(k)).toBeGreaterThanOrEqual(prev); prev = easeOutSlow(k); }
   });
 });
+
+import { positionOf, shuffleOrder } from "@/lib/wheel-geometry";
+
+function seeded(seed: number) {
+  let s = seed >>> 0;
+  return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 2 ** 32; };
+}
+
+describe("shuffled slice order", () => {
+  it("is a permutation containing each index once", () => {
+    for (const n of [1, 2, 5, 8, 12]) for (const seed of [1, 7, 42]) {
+      const order = shuffleOrder(n, seeded(seed));
+      expect([...order].sort((a, b) => a - b)).toEqual(Array.from({ length: n }, (_, i) => i));
+    }
+  });
+
+  it("positionOf round-trips", () => {
+    const order = shuffleOrder(9, seeded(3));
+    for (let w = 0; w < 9; w++) expect(order[positionOf(order, w)]).toBe(w);
+  });
+
+  it("lands the server's original prize under the pin", () => {
+    for (const n of [3, 6, 8, 11]) for (const seed of [2, 9, 123]) {
+      const order = shuffleOrder(n, seeded(seed));
+      for (let w = 0; w < n; w++) for (const jitter of [-0.5, 0, 0.49]) {
+        const end = spinTarget(startRotation(n) + seed * 13, positionOf(order, w), n, jitter);
+        expect(order[sliceUnderPin(end, n)]).toBe(w);
+      }
+    }
+  });
+});
