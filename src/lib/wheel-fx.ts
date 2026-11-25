@@ -66,9 +66,6 @@ export function missSound() {
   tone(247, 0.22, 0.4, "sine", 0.14, 180);
   vibrate(80);
 }
-export function creepSound() {
-  tone(220, 0, 0.5, "sine", 0.06, 440);
-}
 /** Rising beeps while the gift box shakes. */
 export function giftSound() {
   vibrate([30, 30, 30, 30, 30]);

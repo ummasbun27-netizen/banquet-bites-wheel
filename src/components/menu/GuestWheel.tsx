@@ -6,11 +6,10 @@ import { Button } from "@/components/ui/button";
 import { guestWheelSchema } from "@/lib/wheel-schema";
 import { loadPrizes, savePrize, type SavedPrize } from "@/lib/saved-prizes";
 import {
-  CREEP_MS, CREEP_PAUSE_MS, CREEP_RESULT_DELAY_MS, SPIN_MS, creepTarget, easeInOutQuad, easeOutQuint,
-  isNearMiss, landingSlice, sliceUnderPin, spinTarget, startRotation, tickSpeed,
+  SPIN_MS, easeOutSlow, sliceUnderPin, spinTarget, startRotation, tickSpeed,
 } from "@/lib/wheel-geometry";
 import {
-  confetti, creepSound, giftSound, loadSoundSetting, missSound, setSoundSetting, stopConfetti,
+  confetti, giftSound, loadSoundSetting, missSound, setSoundSetting, stopConfetti,
   tickSound, unlockAudio, vibrate, winSound,
 } from "@/lib/wheel-fx";
 
@@ -85,11 +84,6 @@ export function GuestWheel({ open, onOpenChange }: { open: boolean; onOpenChange
   const result = winner === null ? undefined : prizes[winner];
   // Before the first spin, the first prize sits centred under the pin (not on a slice edge).
   const shownRotation = hasSpun ? rotation : startRotation(prizes.length);
-
-  function later(fn: () => void, ms: number) {
-    const id = window.setTimeout(() => { timers.current = timers.current.filter((t) => t !== id); fn(); }, ms);
-    timers.current.push(id);
-  }
 
   function wigglePin() {
     const el = pin.current;
@@ -169,24 +163,14 @@ export function GuestWheel({ open, onOpenChange }: { open: boolean; onOpenChange
           setGift(false); winSound(); confetti(confettiCanvas.current);
         }, 1000);
       };
-      // The server already chose the prize; a near-miss only changes the animation, never the result.
-      const nearMiss = isNearMiss(won, n, Math.random());
+      // The server already chose the prize; one smooth spin lands straight on it.
       const start = hasSpun ? rot.current : startRotation(n);
-      const target = spinTarget(start, landingSlice(index, n, nearMiss), n, Math.random() - 0.5);
+      const target = spinTarget(start, index, n, Math.random() - 0.5);
       rot.current = start;
       lastSlice.current = sliceUnderPin(start, n);
       setHasSpun(true); setRotation(start); setGlow(true);
       // Always animate: the spin itself is the feature, even when the device asks for reduced motion.
-      animate(start, target, SPIN_MS, easeOutQuint, () => {
-        if (!nearMiss) { showResult(); return; }
-        creepSound();
-        later(() => {
-          animate(rot.current, creepTarget(rot.current, index, n), CREEP_MS, easeInOutQuad, () => {
-            setGlow(false);
-            later(showResult, CREEP_RESULT_DELAY_MS);
-          });
-        }, CREEP_PAUSE_MS);
-      });
+      animate(start, target, SPIN_MS, easeOutSlow, showResult);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Please try again.");
       setGlow(false); setBusy(false); spinning.current = false;

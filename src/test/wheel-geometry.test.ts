@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { creepTarget, isNearMiss, landingSlice, sliceUnderPin, spinTarget, startRotation } from "@/lib/wheel-geometry";
+import { SPIN_TURNS, easeOutSlow, sliceUnderPin, spinTarget, startRotation } from "@/lib/wheel-geometry";
 
 describe("guest wheel geometry", () => {
   it("starts with the first prize centred under the pin", () => {
@@ -7,26 +7,25 @@ describe("guest wheel geometry", () => {
     expect(sliceUnderPin(startRotation(8), 8)).toBe(0);
   });
 
-  it("stops on the server's winning slice after at least 7 turns", () => {
-    for (const jitter of [-0.49, 0, 0.49]) {
-      const end = spinTarget(startRotation(8), 5, 8, jitter);
-      expect(sliceUnderPin(end, 8)).toBe(5);
-      expect(end - startRotation(8)).toBeGreaterThanOrEqual(7 * 360);
+  it("one spin stops on the server's winning slice after at least 6 turns", () => {
+    expect(SPIN_TURNS).toBe(6);
+    for (const n of [3, 6, 8, 12]) {
+      for (let index = 0; index < n; index++) {
+        for (const jitter of [-0.49, 0, 0.49]) {
+          for (const start of [startRotation(n), 123.4, 5000.7]) {
+            const end = spinTarget(start, index, n, jitter);
+            expect(sliceUnderPin(end, n)).toBe(index);
+            expect(end - start).toBeGreaterThanOrEqual(6 * 360);
+          }
+        }
+      }
     }
   });
 
-  it("near-miss stops one slice before the prize, then crawls onto it", () => {
-    expect(landingSlice(3, 8, true)).toBe(4);
-    expect(landingSlice(7, 8, true)).toBe(0);
-    const first = spinTarget(0, landingSlice(3, 8, true), 8, 0.3);
-    expect(sliceUnderPin(first, 8)).toBe(4);
-    expect(sliceUnderPin(creepTarget(first, 3, 8), 8)).toBe(3);
-  });
-
-  it("never near-misses on the miss slice or a two-slice wheel", () => {
-    expect(isNearMiss({ x: true }, 8, 0)).toBe(false);
-    expect(isNearMiss({}, 2, 0)).toBe(false);
-    expect(isNearMiss({}, 8, 0.69)).toBe(true);
-    expect(isNearMiss({}, 8, 0.7)).toBe(false);
+  it("eases out monotonically from 0 to 1", () => {
+    expect(easeOutSlow(0)).toBe(0);
+    expect(easeOutSlow(1)).toBe(1);
+    let prev = 0;
+    for (let k = 0.05; k <= 1; k += 0.05) { expect(easeOutSlow(k)).toBeGreaterThanOrEqual(prev); prev = easeOutSlow(k); }
   });
 });
